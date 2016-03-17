@@ -11,7 +11,7 @@ app.use("/data", express.static(__dirname + "/web/data"));
 app.use("/img", express.static(__dirname + "/web/img"));
 app.use("/js", express.static(__dirname + "/web/js"));
 app.use("/stylesheets", express.static(__dirname + "/web/stylesheets"));
-app.use("/", express.static(__dirname + "/web"));
+app.use("/html", express.static(__dirname + "/web/html"));
 
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
@@ -26,7 +26,7 @@ var server = app.listen(process.env.PORT || 9000, function () {
 
 // STATIC CONTENT
 app.all("/", function(req, res, next) {
-	res.sendfile("index.html", { root: __dirname + "/web" });
+	res.sendfile("index.html", { root: __dirname + "/web/html" });
 });
 
 // TRANSPORT API
