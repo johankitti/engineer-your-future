@@ -2,7 +2,7 @@ var WIKIPEDIA = function() {
   var my = {};
 
   // DBPedia SPARQL endpoint
-  my.endpoint = 'http://dbpedia.org/sparql/';
+  my.endpoint = 'https://dbpedia.org/sparql/';
 
   // ### getData
   //
@@ -52,12 +52,12 @@ var WIKIPEDIA = function() {
     if (url.indexOf('wikipedia')!=-1) {
       var parts = url.split('/');
       var title = parts[parts.length-1];
-      url = 'http://dbpedia.org/resource/' + title;
+      url = 'https://dbpedia.org/resource/' + title;
       return url;
     } else if (url.indexOf('dbpedia.org')!=-1) {
       return url;
     } else {
-      url = 'http://dbpedia.org/resource/' + url.replace(/ /g, '_');
+      url = 'https://dbpedia.org/resource/' + url.replace(/ /g, '_');
       return url;
     }
   };
@@ -105,10 +105,10 @@ var WIKIPEDIA = function() {
   };
 
   // ### lookupProperty
-  // 
+  //
   // lookup a property value given a standard RDF/JSON property dictionary
   // e.g. something like ...
-  // 
+  //
   //       ...
   //       "http://dbpedia.org/property/regent": [
   //              {
@@ -130,7 +130,7 @@ var WIKIPEDIA = function() {
 
   // Extract a standard set of attributes (e.g. title, description, dates etc
   // etc) from rdfJson and the given subject uri (url) e.g.
-  // 
+  //
   //      extractSummary('http://dbpedia.org/resource/Rufus_Pollock', rdfJson object from dbpedia)
   my.extractSummary = function(subjectUri, rdfJson) {
     var properties = rdfJson[subjectUri];
