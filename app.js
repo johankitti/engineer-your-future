@@ -3,6 +3,8 @@ var express = require('express');
 var http = require('http');
 var https = require('https');
 var bodyParser = require('body-parser');
+var Wiki = require("wikijs");
+
 // Setup server
 var app = express();
 
@@ -29,25 +31,17 @@ app.all("/", function(req, res, next) {
 	res.sendfile("index.html", { root: __dirname + "/web/html" });
 });
 
-// TRANSPORT API
-app.get('/api/transport/:dest/:station/:exclude', function(req, res) {
-  var url = '/api2/TravelplannerV2/trip.json?key=' + config.transportation.apiKey +
-	'&originId=' + req.params.station + '&destId=' + req.params.dest +
-	req.params.exclude;
-  var options = {
-    host: 'api.sl.se',
-    path: url
-  };
-
-  http.request(options, function(response) {
-    var str = '';
-
-    response.on('data', function (chunk) {
-      str += chunk;
-    });
-
-    response.on('end', function () {
-      res.send(str);
-    });
-  }).end();
+// API
+app.get('/api/wiki:query', function(req, res) {
+	var query = req.params.query;
+	wiki.page(query).then(function(page) {
+		console.log('PAGE: ' + page);
+		page.summary().then(function(summary) {
+			res.send(summary);
+		});
+	}, function(reason) {
+		res.send('');
+	});
 });
+
+var wiki = new Wiki();
