@@ -26,6 +26,12 @@ var server = app.listen(process.env.PORT || 8111, function () {
 	console.log('Engineer your future app is listening at http://%s:%s', host, port);
 });
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 // STATIC CONTENT
 app.all("/", function(req, res, next) {
 	res.sendfile("index.html", { root: __dirname + "/web/html" });

@@ -1,18 +1,13 @@
+var sizes = new SizeManager();
+
 var mainPadding = 15; // Fluid container padding
 var navBarHeight = 71;
 
 // Original width: 1200px, height: 800px
+var heightFactor = sizes.height / 800;
+var widthFactor = sizes.width / 1200; // Design is designed for 1200x800
 
-var screenHeight = window.innerHeight - navBarHeight - 2*mainPadding;
-var screenWidth = window.innerWidth - 2*mainPadding;
-if (screenWidth > 1200) {
-  screenWidth = 1200;
-}
-
-var heightFactor = screenHeight / 800;
-var widthFactor = screenWidth / 1200; // Design is designed for 1200x800
-
-var globalMargin = screenHeight / 10;
+var globalMargin = sizes.height / 10;
 
 var categorySize = 50 * heightFactor;
 
@@ -21,13 +16,14 @@ var panAmount = 250 * widthFactor;
 
 var bubbleRadius = 40 * widthFactor;
 
-var delta = ( 2 * Math.PI) / 14; //programs.length;
-var detailDelta = (2 * Math.PI) / 9;
+// var delta = ( 2 * Math.PI) / 14; //programs.length;
+// var sizes.delta(6) = (2 * Math.PI) / 9;
 
-var detailX = (screenWidth / 2)-120;
-var detailY = screenHeight / 2; //350;
-var selectedBubbleX = (screenWidth / 2)-100;
-var selectedBubbleY = screenHeight / 2;
+var detailX = (sizes.width / 2)-120;
+var detailY = sizes.height / 2; //350;
+var selectedBubbleX = (sizes.width / 2)-100;
+var selectedBubbleY = sizes.height / 2;
+
 var pannedBubbleX = selectedBubbleX;
 var tooltip = new Tooltip((d) => d[0]);
 var donut, donutToggle;
@@ -57,8 +53,8 @@ var programs = [
 
 //Creating Canvas
 var canvas = d3.select('#main-svg')
-  .attr('height', screenHeight)
-  .attr('width', screenWidth);
+  .attr('height', sizes.height)
+  .attr('width', sizes.width);
 
 var detailBubbles, detailText, bubble, bubbleText;
 var clickedProgram = new Array(1);
@@ -129,7 +125,7 @@ function setup(error, data) {
         var array = filterOnClick(data, clickedProgram, i);
         bubblePan(d, i);
         if(donut) donut.delete();
-        donut = new Donut(d, array, screenWidth, screenHeight);
+        donut = new Donut(d, array, sizes.width/2, sizes.height/2, sizes.width*3/4, sizes.height/2);
       }
     })
     .classed("hidden-section", true)
@@ -139,7 +135,7 @@ function setup(error, data) {
     .attr("id", function(d,i){
       return i;
     })
-    .attr("cx", selectedBubbleX)//(screenWidth / 2) - 100)
+    .attr("cx", selectedBubbleX)//(sizes.width / 2) - 100)
     .attr("cy", selectedBubbleY)//350)
     .attr("r", function(d) {
       return 5
@@ -179,14 +175,8 @@ function setup(error, data) {
         var array = filterOnClick(data, clickedProgram, i);
         bubblePan(d, i);
         if(donut) donut.delete();
-        donut = new Donut(d, array, screenWidth, screenHeight);
+        donut = new Donut(d, array, sizes.width/2, sizes.height/2, sizes.width*3/4, sizes.height/2);
       }
-    })
-    .attr("x", function(d, i) {
-      return r1 * Math.cos((+i - 1) * detailDelta) + 100 + detailX * widthFactor * 3 / 4;
-    })
-    .attr("y", function(d, i) {
-      return r1 * Math.sin((+i - 1) * detailDelta * heightFactor) + detailY + 5
     })
     .on("mouseover", function(d,i){
       document.getElementById(i).setAttribute('fill', '#696969');
@@ -244,8 +234,8 @@ function setup(error, data) {
     });
 
     welcometext = canvas.append("text")
-      .attr("x", screenWidth / 2)
-      .attr("y", screenHeight / 2)
+      .attr("x", sizes.width / 2)
+      .attr("y", sizes.height / 2)
       .attr("fill", "#fff")
       .attr("class", "welcome-text")
       .style("text-anchor", "middle")
@@ -259,8 +249,8 @@ function setup(error, data) {
      .attr("id", "donut-details")
      .classed("hidden-section", true)
      .classed("active-section", false)
-     .attr("x", (screenWidth / 2) + 400*widthFactor)
-     .attr("y", screenHeight*3 / 4)
+     .attr("x", (sizes.width / 2) + 400*widthFactor)
+     .attr("y", sizes.height*3 / 4)
      .attr("height", 150 * heightFactor)
      .attr("width", 300 * widthFactor)
 
@@ -271,17 +261,17 @@ function setup(error, data) {
      .classed("hidden-section", true)
      .classed("active-section", false)
      .attr("id", "donut-details-text")
-     .attr("x", (screenWidth / 2) + 120)
-     .attr("y", screenHeight*3 / 4 + 30)
+     .attr("x", (sizes.width / 2) + 120)
+     .attr("y", sizes.height*3 / 4 + 30)
      //Move style to css file
      .style("opacity", 1)
      //Apply text from data
   //   .text("bralblblbllaaa Kul med jobb");
 
-  var toggleButtonWidth = screenWidth / 20,
-      toggleButtonHeight = screenHeight / 35;
-  var containerX = screenWidth / 2 + panAmount * widthFactor - toggleButtonWidth,
-      containerY = screenHeight / 5;
+  var toggleButtonWidth = sizes.width / 15,
+      toggleButtonHeight = sizes.height / 35;
+  var containerX = sizes.width*3/4 - toggleButtonWidth,
+      containerY = sizes.height / 6;
 
   var container = canvas.selectAll('div').data('a')
     .enter().append('g')
@@ -352,7 +342,7 @@ container.append('rect')
     .attr("id", "donut-toggle")
     .classed("hidden-section", true)
     .classed("active-section", false)
-    .attr("x", (screenWidth / 2) + 200)
+    .attr("x", (sizes.width / 2) + 200)
     .attr("y", 50)
     .attr("height", 35)
     .attr("width", 100)
@@ -370,7 +360,7 @@ container.append('rect')
     .classed("hidden-section", true)
     .classed("active-section", false)
     .attr("id", "donut-toggle-text")
-    .attr("x", (screenWidth / 2) + 300)
+    .attr("x", (sizes.width / 2) + 300)
     .attr("y", 70)
     .attr("fill", "#DDDDDD")
     //Move style to css file
@@ -390,8 +380,8 @@ container.append('rect')
       		.classed("active-section", false);
     	})
   	.append("svg:image")
-  	.attr("x", function(d,i) {return r1 * Math.cos(+i*delta) + 575})
-  	.attr("y", function(d,i) {return r1 * Math.sin(+i*delta) + 325})
+  	.attr("x", function(d,i) {return sizes.bigRadius * Math.cos(+i*delta) + 575})
+  	.attr("y", function(d,i) {return sizes.bigRadius * Math.sin(+i*delta) + 325})
   	.attr("width", 50)
   	.attr("height", 50)
   	.style("opacity", 0)
@@ -427,15 +417,12 @@ function mainViewAnimation(){
     })
     .duration(1300)
     .style("opacity", 1)
-
-    .attr('r', function(){
-      return bubbleRadius;
-    })
+    .attr('r', sizes.bubbleRadius)
     .attr("cx", function(d, i) {
-      return r1 * Math.cos(+i * delta) + screenWidth / 2;
+      return sizes.bigRadius * Math.cos(+i * sizes.delta(14)) + sizes.width / 2;
     })
     .attr("cy", function(d, i) {
-      return r1 * Math.sin(+i * delta) + screenHeight / 2;
+      return sizes.bigRadius * Math.sin(+i * sizes.delta(14)) + sizes.height / 2;
     });
 
   bubbleText.transition()
@@ -444,10 +431,10 @@ function mainViewAnimation(){
     })
     .duration(1300)
     .attr("x", function(d, i) {
-      return r1 * Math.cos(+i * delta) + screenWidth / 2;
+      return sizes.bigRadius * Math.cos(+i * sizes.delta(14)) + sizes.width / 2;
     })
     .attr("y", function(d, i) {
-      return r1 * Math.sin(+i * delta) + screenHeight / 2 + 7;
+      return sizes.bigRadius * Math.sin(+i * sizes.delta(14)) + sizes.height / 2 + 7;
     })
     .style("opacity", 0.9)
     .text(function(d) {
@@ -569,7 +556,7 @@ function skillSearch(value) {
         .duration(2000)
         .style("opacity", function(d, i) {
           var program = programs[i][0];
-            //få tillbaks namnen om man trycker på inget
+            //fÃ¥ tillbaks namnen om man trycker pÃ¥ inget
             if (skill == "") {
               return 1;
             }
@@ -648,7 +635,7 @@ function skillSearch(value) {
 
         for (j = 0; j < json[i].skills.length; j++) {
           //console.log(json[i].skills[j].name);
-          //få tillbaks namnen om man trycker på inget
+          //fÃ¥ tillbaks namnen om man trycker pÃ¥ inget
           if (skill == "") {
             return 1;
           }
@@ -681,18 +668,16 @@ function bubbleTransform(d, i) {
   detailBubbles.transition()
     .delay(600)
     .duration(1100)
-    .attr("cx", function(d, i) {
-      return r1 * Math.cos((+i - 1) * detailDelta) + 100 + detailX * widthFactor * 3 / 4; // lite trollande för att få det bra i olika upplösningar
-    })
-    .attr("cy", function(d, i) {
-      return r1 * Math.sin((+i - 1) * detailDelta * heightFactor) + detailY;
-    })
+    .attr("cx", (d,i) => detailX + sizes.bigRadius* Math.cos((+i - 1) * sizes.delta(6)))
+    .attr("cy", (d, i) => detailY + sizes.bigRadius* Math.sin((+i - 1) * sizes.delta(6)))
     .attr("r", 50 * widthFactor)
     .style("opacity", 1);
 
   detailText.transition()
     .delay(800)
     .duration(1100)
+    .attr("x", (d,i) => detailX + sizes.bigRadius* Math.cos((+i - 1) * sizes.delta(6)))
+    .attr("y", (d, i) => detailY + sizes.bigRadius* Math.sin((+i - 1) * sizes.delta(6)))
     .style("opacity", 1);
 
   bubble.transition()
@@ -755,27 +740,23 @@ function bubbleTransform(d, i) {
 
 function bubblePan(d, i) {
   var chosenIndex = i;
-  pannedBubbleX = selectedBubbleX - panAmount * widthFactor;
+  pannedBubbleX = selectedBubbleX - sizes.shortSide/2;
 
   detailBubbles.transition()
     .delay(200)
     .duration(800)
-    .attr("cx", function(d, i) {
-      return r1 * Math.cos((+i - 1) * detailDelta) + 100 + detailX * widthFactor * 3 / 4- panAmount * widthFactor - 30;
-    });
+    .attr("cx", (d, i) => sizes.width/3 + sizes.focusRadius * Math.cos((i - 1)));
 
   detailText.transition()
     .delay(200)
     .duration(800)
-    .attr("x", function(d, i) {
-      return r1 * Math.cos((+i - 1) * detailDelta) + 100 + detailX * widthFactor * 3 / 4 - panAmount * widthFactor - 30;
-    });
+    .attr("x", (d, i) => sizes.width/3 +  sizes.focusRadius * Math.cos((i - 1)));
 
   bubble.transition()
     .delay(100)
     .duration(800)
-    .attr("cx", pannedBubbleX)
-    .attr("cy", selectedBubbleY)
+    .attr("cx", sizes.width/5)
+    .attr("cy", sizes.height/2)
     .attr("fill", function(d, i) {
       return color(i);
     });
@@ -784,8 +765,8 @@ function bubblePan(d, i) {
   bubbleText.transition()
     .delay(100)
     .duration(800)
-    .attr("x", selectedBubbleX - panAmount * widthFactor)
-    .attr("y", selectedBubbleY);
+    .attr("x", sizes.width/5)
+    .attr("y", sizes.height/2)
 
   /*bubbleText.transition()
     .delay(100)
@@ -832,14 +813,14 @@ function backTransition() {
     .style("opacity", 0)
     .transition()
     .attr("x", function(d, i) {
-      return r1 * Math.cos((+i - 1) * detailDelta) + 100 + detailX * widthFactor * 3 / 4;//r1 * Math.cos((+i - 1) * detailDelta) + detailX;
+      return sizes.bigRadius * Math.cos((+i - 1) * sizes.delta(6)) + 100 + detailX * widthFactor * 3 / 4;//sizes.bigRadius * Math.cos((+i - 1) * sizes.delta(6)) + detailX;
     });
 
   detailBubbles.transition()
     .delay(100)
     .duration(1000)
-    .attr("cx", pannedBubbleX)//screenWidth / 2) - 200)
-    .attr("cy", selectedBubbleY)//screenHeight / 2)
+    .attr("cx", pannedBubbleX)//sizes.width / 2) - 200)
+    .attr("cy", selectedBubbleY)//sizes.height / 2)
     .attr("r", 5)
     .style("opacity", 0)
     .transition()
@@ -849,10 +830,10 @@ function backTransition() {
   //   .delay(400)
   //   .duration(1100)
   //   .attr("cx", function(d, i) {
-  //     return r1 * Math.cos(+i * delta) + screenWidth / 2;
+  //     return sizes.bigRadius * Math.cos(+i * delta) + sizes.width / 2;
   //   })
   //   .attr("cy", function(d, i) {
-  //     return r1 * Math.sin(+i * delta) + screenHeight / 2;
+  //     return sizes.bigRadius * Math.sin(+i * delta) + sizes.height / 2;
   //   })
   //   .attr("r", function(d) {
   //     return 50;
@@ -868,10 +849,10 @@ function backTransition() {
   //   .delay(400)
   //   .duration(1100)
   //   .attr("x", function(d, i) {
-  //     return r1 * Math.cos(+i * delta) + screenWidth / 2;
+  //     return sizes.bigRadius * Math.cos(+i * delta) + sizes.width / 2;
   //   })
   //   .attr("y", function(d, i) {
-  //     return r1 * Math.sin(+i * delta) + screenHeight / 2;
+  //     return sizes.bigRadius * Math.sin(+i * delta) + sizes.height / 2;
   //   })
   //   .style("opacity", 1);
 }
@@ -889,6 +870,6 @@ function showSkillsDonut(){
     }
     bubblePan(d, i);
     if(donut) donut.delete(); //
-    donut = new Donut("Skills", array, screenWidth, screenHeight);
+    donut = new Donut(d, array, sizes.width/2, sizes.height/2, sizes.width*3/4, sizes.height/2);
   });
 }

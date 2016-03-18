@@ -63,14 +63,9 @@ class Tooltip {
 }
 
 class Donut {
-  constructor(name, data, showAll) {
-    var width = screenWidth / 2,
-        height = screenHeight / 2,
-        radius = Math.min(width, height) / 2,
-        donutWidth = radius / 2.5;
-
-    var x = screenWidth / 2 + panAmount * widthFactor,
-        y = screenHeight / 2;
+  constructor(name, data, width, height, x, y) {
+    var radius = Math.min(width, height) / 2;
+    var donutWidth = radius / 2.5;
 
     this.tooltip = new Tooltip((d) => d.data.key);
     this.color = (i) => d3.hcl(i * 27, 10 + 40 * Math.sin(i), 40 + (i % 2) * 40).toString();
@@ -107,12 +102,7 @@ class Donut {
 
      //this.donut.selectAll('path')
 
-     //sets first showAll to false unless other is defined
-     if(showAll == undefined || showAll != true){
       this.showAll = false;
-     }else{
-       this.showAll = showAll;
-     }
   }
 
   get showAll(){
@@ -166,161 +156,130 @@ class Donut {
     .classed("active-section", false)
     .classed("hidden-section", true);
   }
-  updateDonut(data){
-    this.donut.selectAll('path').remove();
-    this.donut.selectAll('path')
-        .data(this.pie(data)) // Show all
-        .enter()
-        .append('path')
-        .attr('d', this.arc)
-        .attr('fill', (d, i) => this.color(i))
-        .attr("class", "donut-path")
-        .on("mouseover", (d) => {
-          this.tooltip.show(d);
-          this.showDetails(d.data);
-        })
-        .on("mousemove", this.tooltip.move)
-        .on("mouseout", this.tooltip.hide)
-        //on click event where d.data is the label attached to the clicked segment, ex name:ericsson, count:21
-        //.on("click", (d) => this.showDetails(d.data))
-        .transition()
-        .duration(1200)
-        .attrTween("d", this.tweenPie);
-
-        canvas.selectAll("#donut-toggle , #donut-toggle-text")
-        .classed("hidden-section", false)
-        .classed("active-section", true);
-        canvas.selectAll("#donut-toggle-text")
-        .text("Toggle Top/All "+this.name);
-
-
-  }
-
-  delete() {
-    canvas.selectAll(".donut").remove();
-    canvas.selectAll("#donut-details , #donut-details-text, #donut-toggle, #donut-toggle-text")
-    .classed("active-section", false)
-    .classed("hidden-section", true);
-  }
   showDetails(data){
 
-    var searchWord = data.key.replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_");
-
-    $.get('/api/wiki' + searchWord, '', function(summary){
+    var display = function(info) {
       d3.selectAll('#text-span').remove();
-      d3.selectAll("#donut-details, #donut-details-text")
-        .classed("active-section", true)
-        .classed("hidden-section", false)
-        .append("tspan")
-        .attr("text-anchor", "middle")
-        .attr("x", (screenWidth / 2) + panAmount * widthFactor)
-        .attr('id', 'text-span')
-        .text("Unfortunately we don't have any additional data about "+ data.key +".")
-        .append("a")
-        .attr("text-anchor", "middle")
-        .attr("class", "google-link")
-        .on("click", function(){ d3.select(this).attr("target", "_blank").attr("xlink:href", 'http://google.com/#q=' + data.key);})
-        .append("tspan")
-        .attr("text-anchor", "middle")
-        .attr("x", (screenWidth / 2) + panAmount * widthFactor)
-        .attr('dy', 25)
-        .attr('id', 'text-span')
-        .text("Let me google that for you");
+      var textToPrintIn = info.summary.summary;
+      var textToPrint=[];
+      if(textToPrintIn){
 
-      //console.log('summary: ' + summary);
-      if (summary) {
-        d3.selectAll('#text-span').remove();
-        var textToPrintIn = summary;
-        var textToPrint=[];
-        if(textToPrintIn){
-          var textToPrintSnippets = textToPrintIn.match(/(\S+)|(\S+)(?= *\n|$)|\S+/g);
-          //textToPrint = textToPrint.match(/(\S+ \S+ \S+ \S+ \S+ \S+ \S+ \S+ \S+)|(\S+ \S+ \S+ \S+ \S+ \S+ \S+)(?= *\n|$)|\S+/g);
+        var textToPrintSnippets = textToPrintIn.match(/(\S+)|(\S+)(?= *\n|$)|\S+/g);
+        //textToPrint = textToPrint.match(/(\S+ \S+ \S+ \S+ \S+ \S+ \S+ \S+ \S+)|(\S+ \S+ \S+ \S+ \S+ \S+ \S+)(?= *\n|$)|\S+/g);
 
-          for(var j=0;j<6;j++){
-            var textToPush="";
-            for(var k=0;k<10;k++){
-              var singleWord = textToPrintSnippets.shift();
-              if(typeof singleWord !== 'undefined'){
-                textToPush += singleWord+" ";
-              }else{
-                textToPush+="";
-              }
+        for(var j=0;j<6;j++){
+          var textToPush="";
+          for(var k=0;k<10;k++){
+            var singleWord = textToPrintSnippets.shift();
+            if(typeof singleWord !== 'undefined'){
+              textToPush += singleWord+" ";
+            }else{
+              textToPush+="";
             }
-            textToPrint[j]=textToPush;
           }
-          d3.selectAll("#donut-details, #donut-details-text")
-            .classed("active-section", true)
-            .classed("hidden-section", false)
-            .append("tspan")
-            .attr("text-anchor", "middle")
-            .attr('dy', 0)
-            .attr("x", (screenWidth / 2) + panAmount * widthFactor)
-            .attr('id', 'text-span')
-            .text(textToPrint[0])
-            .append("tspan")
-            .attr("text-anchor", "middle")
-            .attr("x", (screenWidth / 2) + panAmount * widthFactor)
-            .attr('dy', 15)
-            .attr('id', 'text-span')
-            .text(textToPrint[1])
-            .append("tspan")
-            .attr("text-anchor", "middle")
-            .attr("x", (screenWidth / 2) + panAmount * widthFactor)
-            .attr('dy', 15)
-            .attr('id', 'text-span')
-            .text(textToPrint[2])
-            .append("tspan")
-            .attr("text-anchor", "middle")
-            .attr("x", (screenWidth / 2) + panAmount * widthFactor)
-            .attr('dy', 15)
-            .attr('id', 'text-span')
-            .text(textToPrint[3])
-            .append("tspan")
-            .attr("text-anchor", "middle")
-            .attr("x", (screenWidth / 2) + panAmount * widthFactor)
-            .attr('dy', 15)
-            .attr('id', 'text-span')
-            .text(textToPrint[4])
-            .append("tspan")
-            .attr("text-anchor", "middle")
-            .attr("x", (screenWidth / 2) + panAmount * widthFactor)
-            .attr('dy', 15)
-            .attr('id', 'text-span')
-            .text(textToPrint[5]+'...')
-            .append("a")
-            .attr("text-anchor", "middle")
-            .attr("id", "wiki-link")
-            .on("click", function(){ d3.select(this).attr("target", "_blank").attr("xlink:href", 'http://en.wikipedia.org/wiki/' + searchWord);})
-            .append("tspan")
-            .attr("text-anchor", "middle")
-            .attr("x", (screenWidth / 2) + panAmount * widthFactor)
-            .attr('dy', 25)
-            .attr('id', 'text-span')
-            .text('Link to Wikipedia');
-
-        } else {
-          textToPrint = data.key;
-          d3.selectAll("#donut-details, #donut-details-text")
-            .classed("active-section", true)
-            .classed("hidden-section", false)
-            .append("tspan")
-            .attr("text-anchor", "middle")
-            .attr("x", (screenWidth / 2) + panAmount * widthFactor)
-            .attr('id', 'text-span')
-            .text("Unfortunately we don't have any additional data about "+ data.key +".").append("tspan")
-            .append("a")
-            .attr("text-anchor", "middle")
-            .attr("class", "google-link")
-            .on("click", function(){ d3.select(this).attr("target", "_blank").attr("xlink:href", 'http://google.com/#q=' + data.key);})
-            .append("tspan")
-            .attr("text-anchor", "middle")
-            .attr("x", (screenWidth / 2)+ panAmount * widthFactor)
-            .attr('dy', 25)
-            .attr('id', 'text-span')
-            .text("Let me google that for you");
+          textToPrint[j]=textToPush;
         }
 
-      } else {
+        d3.selectAll("#donut-details, #donut-details-text")
+      		.classed("active-section", true)
+      		.classed("hidden-section", false)
+          .append("tspan")
+          .attr("text-anchor", "middle")
+          .attr('dy', 0)
+          .attr("x", (sizes.width / 2) + panAmount * widthFactor)
+          .attr('id', 'text-span')
+          .text(textToPrint[0])
+          .append("tspan")
+          .attr("text-anchor", "middle")
+          .attr("x", (sizes.width / 2) + panAmount * widthFactor)
+          .attr('dy', 15)
+          .attr('id', 'text-span')
+          .text(textToPrint[1])
+          .append("tspan")
+          .attr("text-anchor", "middle")
+          .attr("x", (sizes.width / 2) + panAmount * widthFactor)
+          .attr('dy', 15)
+          .attr('id', 'text-span')
+          .text(textToPrint[2])
+          .append("tspan")
+          .attr("text-anchor", "middle")
+          .attr("x", (sizes.width / 2) + panAmount * widthFactor)
+          .attr('dy', 15)
+          .attr('id', 'text-span')
+          .text(textToPrint[3])
+          .append("tspan")
+          .attr("text-anchor", "middle")
+          .attr("x", (sizes.width / 2) + panAmount * widthFactor)
+          .attr('dy', 15)
+          .attr('id', 'text-span')
+          .text(textToPrint[4])
+          .append("tspan")
+          .attr("text-anchor", "middle")
+          .attr("x", (sizes.width / 2) + panAmount * widthFactor)
+          .attr('dy', 15)
+          .attr('id', 'text-span')
+          .text(textToPrint[5]+'...')
+          .append("a")
+          .attr("text-anchor", "middle")
+          .attr("id", "wiki-link")
+          .on("click", function(){ d3.select(this).attr("target", "_blank").attr("xlink:href", 'http://en.wikipedia.org/wiki/' + searchWord);})
+          .append("tspan")
+          .attr("text-anchor", "middle")
+          .attr("x", (sizes.width / 2) + panAmount * widthFactor)
+          .attr('dy', 25)
+          .attr('id', 'text-span')
+          .text('Link to Wikipedia');
+      }
+
+      if (!textToPrintIn) {
+        textToPrint = data.key;
+        d3.selectAll("#donut-details, #donut-details-text")
+      		.classed("active-section", true)
+      		.classed("hidden-section", false)
+          .append("tspan")
+          .attr("text-anchor", "middle")
+          .attr("x", (sizes.width / 2) + panAmount * widthFactor)
+          .attr('id', 'text-span')
+          .text("Unfortunately we don't have any additional data about "+ data.key +".").append("tspan")
+          .append("a")
+          .attr("text-anchor", "middle")
+          .attr("class", "google-link")
+          .on("click", function(){ d3.select(this).attr("target", "_blank").attr("xlink:href", 'http://google.com/#q=' + data.key);})
+          .append("tspan")
+          .attr("text-anchor", "middle")
+          .attr("x", (sizes.width / 2)+ panAmount * widthFactor)
+          .attr('dy', 25)
+          .attr('id', 'text-span')
+          .text("Let me google that for you");
+      }
+
+    }
+
+    var searchWord = data.key.replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_");
+    d3.selectAll('#text-span').remove();
+    d3.selectAll("#donut-details, #donut-details-text")
+      .classed("active-section", true)
+      .classed("hidden-section", false)
+      .append("tspan")
+      .attr("text-anchor", "middle")
+      .attr("x", (sizes.width / 2) + panAmount * widthFactor)
+      .attr('id', 'text-span')
+      .text("Unfortunately we don't have any additional data about "+ data.key +".")
+      .append("a")
+      .attr("text-anchor", "middle")
+      .attr("class", "google-link")
+      .on("click", function(){ d3.select(this).attr("target", "_blank").attr("xlink:href", 'http://google.com/#q=' + data.key);})
+      .append("tspan")
+      .attr("text-anchor", "middle")
+      .attr("x", (sizes.width / 2) + panAmount * widthFactor)
+      .attr('dy', 25)
+      .attr('id', 'text-span')
+      .text("Let me google that for you");
+
+
+    WIKIPEDIA.getData("http://en.wikipedia.org/wiki/" + searchWord, display, function(error) {
+      // om error så kunde den inte hitta
+      if (error){
         d3.selectAll("#donut-details, #donut-details-text")
           .classed("active-section", true)
           .classed("hidden-section", false)
@@ -332,23 +291,22 @@ class Donut {
           .on("click", function(){ d3.select(this).attr("target", "_blank").attr("xlink:href", 'http://google.com/#q=' + data.key);})
           .append("tspan")
           .attr("text-anchor", "middle")
-          .attr("x", (screenWidth / 2) + panAmount * widthFactor)
+          .attr("x", (sizes.width / 2) + panAmount * widthFactor)
           .attr('dy', 25)
           .attr('id', 'text-span')
           .text("Let me google that for you");
       }
-
-    }.bind(d3), 'text');
+    });
   }
   tweenPie(b) {
 
-    var width = screenWidth / 2,
-        height = screenHeight / 2,
+    var width = sizes.width / 2,
+        height = sizes.height / 2,
         radius = Math.min(width, height) / 2,
         donutWidth = radius / 2.5;
 
-    var x = screenWidth / 2 + panAmount * widthFactor,
-        y = screenHeight / 2;
+    var x = sizes.width / 2 + panAmount * widthFactor,
+        y = sizes.height / 2;
 
     var tooltip = new Tooltip((d) => d.data.key);
     var color = (i) => d3.hcl(i * 27, 10 + 40 * Math.sin(i), 40 + (i % 2) * 40).toString();
