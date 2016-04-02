@@ -870,6 +870,6 @@ function showSkillsDonut(){
     }
     bubblePan(d, i);
     if(donut) donut.delete(); //
-    donut = new Donut(d, array, sizes.width/2, sizes.height/2, sizes.width*3/4, sizes.height/2);
+    donut = new Donut('Skills', array, sizes.width/2, sizes.height/2, sizes.width*3/4, sizes.height/2);
   });
 }
