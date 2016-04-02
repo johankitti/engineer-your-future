@@ -1,5 +1,5 @@
 (function () { //Do not polute the global namespace.
-d3.json('data/about.json', showCreators);
+d3.json('../data/about.json', showCreators);
 
 var tooltip = new Tooltip(function(d){return 'I did: ' + d.contribution;})
 
@@ -11,7 +11,7 @@ function showCreators(error, json) {
     .append('div').attr('class', 'creator col-md-3');
 
   var perPhoto = perCreator.append('img')
-    .attr('src',function(d){return 'img/'+d.handle+'.jpg';})
+    .attr('src',function(d){return '../img/'+d.handle+'.jpg';})
     .attr('class',"img-circle creator-img");
 
   perCreator.append('h4')
